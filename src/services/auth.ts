@@ -35,7 +35,7 @@ export async function signIn():Promise<Response>{
             }else{
                 Alert.alert(
                     'Erro',
-                    `Login incorreto ou não encontrado`,
+                    `Acesso não autorizado\n Entre em contato com algum administrador para solicitar a autorização`,
                     [
                         { text: 'Ok', onPress: () => console.log("Erro: Login incorreto ou não encontrado")},
                     ],

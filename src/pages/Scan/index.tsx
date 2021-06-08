@@ -1,7 +1,7 @@
 import React from 'react';
 import {FlatList, ScrollView,View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import SubmitButton from "../../components/submitButton/index"
+import api from "../../services/api";
 import 'react-native-gesture-handler';
 
 const styles= StyleSheet.create({
@@ -66,11 +66,33 @@ const styles= StyleSheet.create({
         padding: 1,
     },
 })
+
 export default class Scan extends React.Component{
     state={
         matricula:'Matrícula',
+        usrMat:'',
         user:'',
+        total:0,
         cartList:[]
+    }
+
+    _criarVenda = async () => {
+        // +this.state.usrMat
+        const response = await api.post('/vendas/20181020150085',{total_venda: this.state.total})
+        this._addProdVenda(response.data.id)
+        console.log('_criarVenda -> ')
+        console.log(this.state.usrMat)
+        console.log(' -> ')
+        console.log(this.state.total)
+        console.log(' <-\n ')
+        console.log('_criarVenda -> ')
+        console.log(response.data.id)
+    }
+
+    _addProdVenda = async (id_venda:string) =>{
+        const response = await api.post('/produtos/'+id_venda,{total_venda: this.state.cartList})
+        console.log('\n_addProdVenda -> ')
+        console.log(response)
     }
 
     addProdutos = async()=>{
@@ -79,12 +101,13 @@ export default class Scan extends React.Component{
     }
     removeItem = (TESTE:number)=>{
         const ed = this.state.cartList
-
+''
         delete ed[2];
 
         this.setState({cartList: ed})
     }
     _renderItem = ({item}) => {
+        this.state.total = this.state.total+item.preco
         var icon = 'null'
         if(item.categoria == 1) var icon = 'cup'
         if(item.categoria == 2) var icon = 'hamburger'
@@ -92,6 +115,7 @@ export default class Scan extends React.Component{
         return(
             <>
             <View style={{flexDirection:'row', padding: 10, alignItems:'center'}}>
+                <Text>{this.state.total}</Text>
                 <MaterialCommunityIcons name={icon} color='#fff' size={26} />
                 <View style={{width:'20%'}}>
                     <Text style={{marginLeft: 10, color:'#fff'}}>{item.nome}</Text>
@@ -108,6 +132,8 @@ export default class Scan extends React.Component{
     }
 
     render(){
+
+        this.state.total = 0
         if(this.props.route.params?.matricula != undefined){
             this.state.matricula = this.props.route.params?.matricula 
         }
@@ -168,11 +194,12 @@ export default class Scan extends React.Component{
 
                     }}
                     >
-                        <SubmitButton
-                            vendedor='20181020150085'
-                            comprador={this.state.matricula}
-                            data={this.state.cartList}
-                        />
+
+                        <TouchableOpacity onPress={this._criarVenda}>
+                            <Text>
+                                Confirmar compra
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>
